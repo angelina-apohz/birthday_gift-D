@@ -34,10 +34,8 @@ button:hover {
   bottom: 60px;
   font-size: 26px;
   text-align: center;
-  /* Увеличиваем z-index, чтобы исключить перекрытие */
-  z-index: 999;
-  opacity: 0;
-  transition: opacity 0.4s ease-in-out;
+  opacity: 0.01; 
+  transition: opacity 0.5s ease-in-out;
   width: 90%;
 }
 .show {
@@ -58,68 +56,60 @@ const music = document.getElementById("music");
 const startBtn = document.getElementById("startBtn");
 const lyricsDiv = document.getElementById("lyrics");
 
-// Тайминги скорректированы для старта с 125 секунд
 const lyrics = [
-  { time: 130, text: "I was meant to love you" },
-  { time: 135, text: "And always keep you in my life..." },
-  { time: 141, text: "I was meant to love you" },
-  { time: 146, text: "I knew I loved you at first sight..." }
+  { time: 130.0, text: "I was meant to love you" },
+  { time: 135.0, text: "And always keep you in my life..." },
+  { time: 141.0, text: "I was meant to love you" },
+  { time: 146.0, text: "I knew I loved you at first sight..." }
 ];
 
 let currentLine = -1;
-
-startBtn.addEventListener("click", () => {
-  startBtn.style.display = "none";
-  
-  // Установка времени
-  music.currentTime = 125;
-  
-  music.play()
-    .then(() => {
-        // Убедимся, что цикл обновления запущен
-        requestAnimationFrame(updateLyrics);
-    })
-    .catch(() => {
-        // Устанавливаем currentTime = 0, если не удалось стартовать с 125
-        music.currentTime = 0; 
-        alert("Нажми кнопку ещё раз, чтобы включить звук 🎧");
-        startBtn.style.display = "block";
-    });
-});
+let timer = null; 
 
 function updateLyrics() {
   const currentTime = music.currentTime;
   
   for (let i = 0; i < lyrics.length; i++) {
-    // Условие: текущее время >= таймингу И эта строка еще не показывалась
-    if (currentTime >= lyrics[i].time && currentLine !== i) {
-      currentLine = i;
-      
-      // Сначала убираем видимость и устанавливаем новый текст
-      lyricsDiv.classList.remove("show");
-      lyricsDiv.textContent = lyrics[i].text;
-      
-      // ПРИНУДИТЕЛЬНЫЙ СБРОС: Сброс анимации для плавного ПОВТОРНОГО появления
-      // Это критически важно, чтобы transition сработал для каждой новой строки
-      void lyricsDiv.offsetWidth; 
-      
-      // Показываем текст
-      lyricsDiv.classList.add("show");
-      
-      break;
-    } 
-    // ЭЛЕМЕНТАРНАЯ ЛОГИКА СКРЫТИЯ: если текущая строка показана, 
-    // но время уже перевалило за ее тайминг, и мы еще не дошли до следующей, 
-    // скрываем ее.
-    else if (currentLine === i && (i + 1 < lyrics.length) && currentTime >= lyrics[i + 1].time - 0.2) {
-        lyricsDiv.classList.remove("show");
+    const lineStartTime = lyrics[i].time;
+    const nextLineStartTime = (i + 1 < lyrics.length) ? lyrics[i + 1].time : Infinity; 
+
+    if (currentTime >= lineStartTime && currentTime < nextLineStartTime) {
+        if (currentLine !== i) {
+            currentLine = i;
+            lyricsDiv.textContent = lyrics[i].text;
+            lyricsDiv.classList.add("show");
+        }
+        return; 
     }
   }
-  
-  if (!music.paused && !music.ended) {
-      requestAnimationFrame(updateLyrics);
+
+  if (currentLine !== -1) {
+      lyricsDiv.classList.remove("show");
   }
 }
+
+startBtn.addEventListener("click", () => {
+  startBtn.style.display = "none";
+  
+  music.currentTime = 125;
+  
+  music.play()
+    .then(() => {
+        if (timer) clearInterval(timer);
+        timer = setInterval(updateLyrics, 100);
+    })
+    .catch(() => {
+        alert("Нажми кнопку ещё раз, чтобы включить звук 🎧");
+        startBtn.style.display = "block";
+    });
+});
+
+music.addEventListener('ended', () => {
+    if (timer) clearInterval(timer);
+    lyricsDiv.classList.remove("show");
+    currentLine = -1;
+    startBtn.style.display = "block";
+});
 </script>
 
 </body>
