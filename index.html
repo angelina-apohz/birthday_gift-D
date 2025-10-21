@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Подарок ❤️</title>
+<style>
+body {
+    margin:0;
+    background:black;
+    color:white;
+    font-family:sans-serif;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+#lyrics {
+    position:absolute;
+    bottom:50px;
+    font-size:24px;
+    text-align:center;
+}
+button {
+    background:#ff0055;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    font-size:18px;
+    border-radius:10px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<button id="startBtn">Сюрприз 💖</button>
+<audio id="music" src="YOUR_AUDIO_URL.mp3"></audio>
+<div id="lyrics"></div>
+
+<script>
+const lyrics = [
+  {time:5, text:"I was meant to love you"},
+  {time:10, text:"And always keep you in my life..."},
+  {time:16, text:"I was meant to love you"}
+  {time:21, text:"I knew I loved you at first sight..."}
+];
+
+const music = document.getElementById("music");
+const lyricsDiv = document.getElementById("lyrics");
+const startBtn = document.getElementById("startBtn");
+
+startBtn.addEventListener("click", () => {
+    startBtn.style.display="none";
+    music.currentTime = 125; // начало с 2:05
+    music.play();
+    requestAnimationFrame(updateLyrics);
+});
+
+function updateLyrics() {
+    const currentTime = music.currentTime;
+    let currentText = "";
+    for (let i=0; i<lyrics.length; i++){
+        if(currentTime >= lyrics[i].time){
+            currentText = lyrics[i].text;
+        }
+    }
+    lyricsDiv.textContent = currentText;
+    requestAnimationFrame(updateLyrics);
+}
+</script>
+
+</body>
+</html>
