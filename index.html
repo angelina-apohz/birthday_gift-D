@@ -2,71 +2,91 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>С Днем Рождения :)</title>
+<title>С Днем Рождения! :)</title>
 <style>
 body {
-    margin:0;
-    background:black;
-    color:white;
-    font-family:sans-serif;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
-#lyrics {
-    position:absolute;
-    bottom:50px;
-    font-size:24px;
-    text-align:center;
+  margin: 0;
+  background-color: black;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
 }
 button {
-    background:#ff0055;
-    color:white;
-    border:none;
-    padding:10px 20px;
-    font-size:18px;
-    border-radius:10px;
-    cursor:pointer;
+  background-color: #ff0055;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 30px;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background-color: #ff3377;
+}
+#lyrics {
+  position: absolute;
+  bottom: 60px;
+  font-size: 26px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+.show {
+  opacity: 1;
 }
 </style>
 </head>
 <body>
 
 <button id="startBtn">Нажми</button>
-<audio id="music" src="YOUR_AUDIO_URL.mp3"></audio>
+<audio id="music" src="2_5309797944113785629.m4a"></audio>
 <div id="lyrics"></div>
 
 <script>
+// 🎵 Впиши сюда прямую ссылку на mp3-файл
+// Пример: "https://example.com/opera-house.mp3"
+const music = document.getElementById("music");
+const startBtn = document.getElementById("startBtn");
+const lyricsDiv = document.getElementById("lyrics");
+
+// 🕒 Текст песни по таймингам (в секундах)
 const lyrics = [
-  {time:5, text:"I was meant to love you"},
-  {time:10, text:"And always keep you in my life..."},
-  {time:16, text:"I was meant to love you"},
-  {time:21, text:"I knew I loved you at first sight..."},
+  { time: 5, text: "I was meant to love you" },
+  { time: 10, text: "And always keep you in my life..." },
+  { time: 16, text: "I was meant to love you" },
+  { time: 21, text: "I knew I loved you at first sight..." }
 ];
 
-const music = document.getElementById("music");
-const lyricsDiv = document.getElementById("lyrics");
-const startBtn = document.getElementById("startBtn");
+let currentLine = -1;
 
 startBtn.addEventListener("click", () => {
-    startBtn.style.display="none";
-    music.currentTime = 125; // начало с 2:05
-    music.play();
-    requestAnimationFrame(updateLyrics);
+  startBtn.style.display = "none";
+  music.currentTime = 125; // ⏱ начать с 2:05
+  music.play().catch(() => {
+    alert("Нажми кнопку ещё раз, чтобы включить звук 🎧");
+  });
+  requestAnimationFrame(updateLyrics);
 });
 
 function updateLyrics() {
-    const currentTime = music.currentTime;
-    let currentText = "";
-    for (let i=0; i<lyrics.length; i++){
-        if(currentTime >= lyrics[i].time){
-            currentText = lyrics[i].text;
-        }
+  const currentTime = music.currentTime;
+  for (let i = 0; i < lyrics.length; i++) {
+    if (currentTime >= lyrics[i].time && currentLine !== i) {
+      currentLine = i;
+      lyricsDiv.textContent = lyrics[i].text;
+      lyricsDiv.classList.remove("show");
+      void lyricsDiv.offsetWidth; // сброс анимации
+      lyricsDiv.classList.add("show");
+      break;
     }
-    lyricsDiv.textContent = currentText;
-    requestAnimationFrame(updateLyrics);
+  }
+  requestAnimationFrame(updateLyrics);
 }
 </script>
 
